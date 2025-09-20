@@ -1,0 +1,17 @@
+package service;
+
+import java.util.*;
+
+public class AttendanceService {
+    private Map<Integer, List<String>> attendanceMap = new HashMap<>();
+
+    public void markAttendance(int empId, String date) {
+        attendanceMap.putIfAbsent(empId, new ArrayList<>());
+        attendanceMap.get(empId).add(date);
+        System.out.println("Attendance marked for EmpID " + empId + " on " + date);
+    }
+
+    public List<String> viewAttendance(int empId) {
+        return attendanceMap.getOrDefault(empId, new ArrayList<>());
+    }
+}
