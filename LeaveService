@@ -1,0 +1,36 @@
+package service;
+
+import model.LeaveApplication;
+import java.util.*;
+
+public class LeaveService {
+    private List<LeaveApplication> leaveList = new ArrayList<>();
+    private int leaveCounter = 1;
+
+    public void applyLeave(int empId, String empName, String start, String end, String reason) {
+        leaveList.add(new LeaveApplication(leaveCounter++, empId, empName, start, end, reason));
+        System.out.println("Leave applied successfully!");
+    }
+
+    public List<LeaveApplication> getLeavesByEmp(int empId) {
+        List<LeaveApplication> list = new ArrayList<>();
+        for (LeaveApplication l : leaveList) {
+            if (l.getEmployeeId() == empId) list.add(l);
+        }
+        return list;
+    }
+
+    public List<LeaveApplication> getAllLeaves() {
+        return leaveList;
+    }
+
+    public void approveLeave(int leaveId, String status) {
+        for (LeaveApplication l : leaveList) {
+            if (l.getLeaveId() == leaveId) {
+                l.setStatus(status);
+                System.out.println("Leave " + status + " for LeaveID " + leaveId);
+                return;
+            }
+        }
+    }
+}
