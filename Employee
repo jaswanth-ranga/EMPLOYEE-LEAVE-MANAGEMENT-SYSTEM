@@ -1,0 +1,50 @@
+package model;
+
+public class Employee {
+    private int id;
+    private String name;
+    private int age;
+    private String mobile;
+    private String dob;
+    private String address;
+    private String fatherMobile;
+    private String bloodGroup;
+    private String password;
+    private String role; // HR or Employee
+    private double salary;
+
+    public Employee(int id, String name, int age, String mobile, String dob,
+                    String address, String fatherMobile, String bloodGroup,
+                    String password, String role, double salary) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.mobile = mobile;
+        this.dob = dob;
+        this.address = address;
+        this.fatherMobile = fatherMobile;
+        this.bloodGroup = bloodGroup;
+        this.password = password;
+        this.role = role;
+        this.salary = salary;
+    }
+
+    // Getters and Setters
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public String getMobile() { return mobile; }
+    public String getDob() { return dob; }
+    public String getAddress() { return address; }
+    public String getFatherMobile() { return fatherMobile; }
+    public String getBloodGroup() { return bloodGroup; }
+    public String getPassword() { return password; }
+    public String getRole() { return role; }
+    public double getSalary() { return salary; }
+    public void setSalary(double salary) { this.salary = salary; }
+
+    @Override
+    public String toString() {
+        return "ID: " + id + " | Name: " + name + " | Role: " + role + " | Salary: " + salary;
+    }
+}
