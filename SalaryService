@@ -1,0 +1,18 @@
+package service;
+
+import model.Employee;
+
+public class SalaryService {
+    public void showSalary(Employee e) {
+        if (e != null) {
+            System.out.println("Salary of " + e.getName() + ": ₹" + e.getSalary());
+        }
+    }
+
+    public void updateSalary(Employee e, double newSalary) {
+        if (e != null) {
+            e.setSalary(newSalary);
+            System.out.println("Updated Salary of " + e.getName() + " to ₹" + newSalary);
+        }
+    }
+}
