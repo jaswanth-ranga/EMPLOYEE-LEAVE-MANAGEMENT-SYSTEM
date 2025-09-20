@@ -1,0 +1,41 @@
+package service;
+
+import model.Employee;
+import java.util.*;
+
+public class EmployeeService {
+    private Map<Integer, Employee> employees = new HashMap<>();
+    private int nextUserId = 1;
+
+    public EmployeeService() {
+        // Preload HR
+        employees.put(0001, new Employee(0001, "Admin", 35, "9999999999",
+                "01-01-1990", "Admin Address", "8888888888", "O+", "admin123", "HR", 50000));
+        nextUserId = 1;
+    }
+
+    public int addEmployee(Employee e) {
+        if (nextUserId > 10) return -1;
+        e = new Employee(nextUserId, e.getName(), e.getAge(), e.getMobile(),
+                e.getDob(), e.getAddress(), e.getFatherMobile(), e.getBloodGroup(),
+                e.getPassword(), "Employee", 30000);
+        employees.put(nextUserId, e);
+        return nextUserId++;
+    }
+
+    public Employee getEmployee(int id) {
+        return employees.get(id);
+    }
+
+    public Collection<Employee> getAllEmployees() {
+        return employees.values();
+    }
+
+    public void deleteEmployee(int id) {
+        employees.remove(id);
+    }
+
+    public void updateSalary(int id, double newSalary) {
+        if (employees.containsKey(id)) employees.get(id).setSalary(newSalary);
+    }
+}
