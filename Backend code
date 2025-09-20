@@ -1,0 +1,266 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.List;
+import model.Employee;
+import service.EmployeeService;
+import service.AttendanceService;
+import service.LeaveService;
+import service.SalaryService;
+
+public class HRManagementGUI {
+
+    static EmployeeService empService = new EmployeeService();
+    static AttendanceService attService = new AttendanceService();
+    static LeaveService leaveService = new LeaveService();
+    static SalaryService salService = new SalaryService();
+    static Employee loggedInUser = null;
+
+    public static void main(String[] args) {
+        showLoginScreen();
+    }
+
+    private static void showLoginScreen() {
+        JFrame loginFrame = new JFrame("Login");
+        loginFrame.setSize(400, 250);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setLayout(new GridLayout(4, 2, 10, 10));
+        loginFrame.setLocationRelativeTo(null);
+
+        JLabel idLabel = new JLabel("User ID:");
+        JTextField idField = new JTextField();
+        JLabel passLabel = new JLabel("Password:");
+        JPasswordField passField = new JPasswordField();
+        JButton loginBtn = new JButton("Login");
+        JButton registerBtn = new JButton("Register");
+
+        loginFrame.add(idLabel);
+        loginFrame.add(idField);
+        loginFrame.add(passLabel);
+        loginFrame.add(passField);
+        loginFrame.add(loginBtn);
+        loginFrame.add(registerBtn);
+
+        loginFrame.setVisible(true);
+
+        loginBtn.addActionListener(e -> {
+            try {
+                int id = Integer.parseInt(idField.getText());
+                String password = new String(passField.getPassword());
+
+                if (id == 1 && password.equals("admin123")) { // HR login
+                    loggedInUser = empService.getEmployee(1);
+                    loginFrame.dispose();
+                    showMainGUI();
+                } else {
+                    Employee emp = empService.getEmployee(id);
+                    if (emp != null && emp.getPassword().equals(password)) {
+                        loggedInUser = emp;
+                        loginFrame.dispose();
+                        showMainGUI();
+                    } else {
+                        JOptionPane.showMessageDialog(loginFrame, "Invalid ID or Password");
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(loginFrame, "Invalid ID format");
+            }
+        });
+
+        registerBtn.addActionListener(e -> {
+            loginFrame.dispose();
+            showRegistrationScreen();
+        });
+    }
+
+    private static void showRegistrationScreen() {
+        if (empService.getAllEmployees().size() >= 11) { // max 10 employees + HR
+            JOptionPane.showMessageDialog(null, "Maximum 10 employee IDs allowed.");
+            showLoginScreen();
+            return;
+        }
+
+        JFrame regFrame = new JFrame("Register Employee");
+        regFrame.setSize(400, 400);
+        regFrame.setLayout(new GridLayout(10, 2, 5, 5));
+        regFrame.setLocationRelativeTo(null);
+
+        JTextField nameField = new JTextField();
+        JTextField ageField = new JTextField();
+        JTextField mobileField = new JTextField();
+        JTextField dobField = new JTextField();
+        JTextField addressField = new JTextField();
+        JTextField fatherMobileField = new JTextField();
+        JTextField bloodField = new JTextField();
+        JTextField passwordField = new JTextField();
+
+        JButton submitBtn = new JButton("Register");
+
+        regFrame.add(new JLabel("Name:")); regFrame.add(nameField);
+        regFrame.add(new JLabel("Age:")); regFrame.add(ageField);
+        regFrame.add(new JLabel("Mobile No:")); regFrame.add(mobileField);
+        regFrame.add(new JLabel("DOB:")); regFrame.add(dobField);
+        regFrame.add(new JLabel("Address:")); regFrame.add(addressField);
+        regFrame.add(new JLabel("Father Mobile No:")); regFrame.add(fatherMobileField);
+        regFrame.add(new JLabel("Blood Group:")); regFrame.add(bloodField);
+        regFrame.add(new JLabel("Password:")); regFrame.add(passwordField);
+        regFrame.add(submitBtn);
+
+        regFrame.setVisible(true);
+
+        submitBtn.addActionListener(e -> {
+            Employee emp = new Employee(
+                    0,
+                    nameField.getText(),
+                    Integer.parseInt(ageField.getText()),
+                    mobileField.getText(),
+                    dobField.getText(),
+                    addressField.getText(),
+                    fatherMobileField.getText(),
+                    bloodField.getText(),
+                    passwordField.getText(),
+                    "Employee",
+                    30000
+            );
+            int id = empService.addEmployee(emp);
+            if (id != -1) {
+                JOptionPane.showMessageDialog(regFrame, "Registered successfully! Your ID: " + id);
+            } else {
+                JOptionPane.showMessageDialog(regFrame, "Maximum employees reached!");
+            }
+            regFrame.dispose();
+            showLoginScreen();
+        });
+    }
+
+    private static void showMainGUI() {
+        JFrame frame = new JFrame("Employee Management System - Welcome " + loggedInUser.getName());
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+
+        // Gradient professional background
+        JPanel backgroundPanel = new JPanel() {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int w = getWidth();
+                int h = getHeight();
+                Color color1 = new Color(200, 220, 240);
+                Color color2 = new Color(240, 240, 255);
+                GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, w, h);
+            }
+        };
+        backgroundPanel.setLayout(new BorderLayout());
+        frame.setContentPane(backgroundPanel);
+
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu profile = new JMenu("Profile");
+        JMenu manage = new JMenu("Manage");
+        JMenu attendance = new JMenu("Attendance");
+        JMenu leave = new JMenu("Leave");
+        JMenu salary = new JMenu("Salary");
+        JMenu delete = new JMenu("Delete");
+        JMenu exit = new JMenu("Exit");
+
+        menuBar.add(profile);
+        if (loggedInUser.getRole().equals("HR")) menuBar.add(manage);
+        menuBar.add(attendance);
+        menuBar.add(leave);
+        if (loggedInUser.getRole().equals("HR")) menuBar.add(salary);
+        if (loggedInUser.getRole().equals("HR")) menuBar.add(delete);
+        menuBar.add(exit);
+
+        // Profile
+        JMenuItem viewProfile = new JMenuItem("View Profile");
+        profile.add(viewProfile);
+        viewProfile.addActionListener(e -> {
+            Employee emp = loggedInUser;
+            JOptionPane.showMessageDialog(frame, emp.toString(), "Profile", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        // Attendance
+        JMenuItem markAtt = new JMenuItem("Mark Attendance");
+        JMenuItem viewAtt = new JMenuItem("View Attendance");
+        attendance.add(markAtt);
+        attendance.add(viewAtt);
+
+        markAtt.addActionListener(e -> {
+            String date = JOptionPane.showInputDialog(frame, "Enter Date (dd-mm-yyyy):");
+            attService.markAttendance(loggedInUser.getId(), date);
+        });
+        viewAtt.addActionListener(e -> {
+            List<String> list = attService.viewAttendance(loggedInUser.getId());
+            JOptionPane.showMessageDialog(frame, list.isEmpty() ? "No attendance yet." : list.toString());
+        });
+
+        // Leave
+        JMenuItem applyLeave = new JMenuItem("Apply Leave");
+        JMenuItem viewLeave = new JMenuItem("View Leave");
+        leave.add(applyLeave);
+        leave.add(viewLeave);
+
+        applyLeave.addActionListener(e -> {
+            String start = JOptionPane.showInputDialog(frame, "Enter Start Date:");
+            String end = JOptionPane.showInputDialog(frame, "Enter End Date:");
+            String reason = JOptionPane.showInputDialog(frame, "Enter Reason:");
+            leaveService.applyLeave(loggedInUser.getId(), loggedInUser.getName(), start, end, reason);
+        });
+
+        viewLeave.addActionListener(e -> {
+            List<model.LeaveApplication> leaves = loggedInUser.getRole().equals("HR") ?
+                    leaveService.getAllLeaves() :
+                    leaveService.getLeavesByEmp(loggedInUser.getId());
+            JOptionPane.showMessageDialog(frame, leaves.isEmpty() ? "No leaves." : leaves.toString());
+        });
+
+        // Salary (HR only)
+        if (loggedInUser.getRole().equals("HR")) {
+            JMenuItem viewSalary = new JMenuItem("View Salary");
+            JMenuItem updateSalary = new JMenuItem("Update Salary");
+            salary.add(viewSalary);
+            salary.add(updateSalary);
+
+            viewSalary.addActionListener(e -> {
+                String idStr = JOptionPane.showInputDialog(frame, "Enter Employee ID:");
+                int id = Integer.parseInt(idStr);
+                Employee e1 = empService.getEmployee(id);
+                if (e1 != null) salService.showSalary(e1);
+            });
+
+            updateSalary.addActionListener(e -> {
+                String idStr = JOptionPane.showInputDialog(frame, "Enter Employee ID:");
+                int id = Integer.parseInt(idStr);
+                Employee e1 = empService.getEmployee(id);
+                if (e1 != null) {
+                    String salStr = JOptionPane.showInputDialog(frame, "Enter New Salary:");
+                    double sal = Double.parseDouble(salStr);
+                    salService.updateSalary(e1, sal);
+                }
+            });
+        }
+
+        // Delete (HR only)
+        if (loggedInUser.getRole().equals("HR")) {
+            JMenuItem delEmp = new JMenuItem("Delete Employee");
+            delete.add(delEmp);
+            delEmp.addActionListener(e -> {
+                String idStr = JOptionPane.showInputDialog(frame, "Enter Employee ID to delete:");
+                int id = Integer.parseInt(idStr);
+                empService.deleteEmployee(id);
+                JOptionPane.showMessageDialog(frame, "Employee Deleted!");
+            });
+        }
+
+        // Exit
+        JMenuItem exitItem = new JMenuItem("Exit");
+        exit.add(exitItem);
+        exitItem.addActionListener(e -> System.exit(0));
+
+        frame.setJMenuBar(menuBar);
+        frame.setVisible(true);
+    }
+}
